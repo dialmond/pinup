@@ -1,6 +1,8 @@
 # my stuff
 *.bk
 README.md.bk
+#SECRET_KEY.txt
+#DEFAULT_PASS.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
