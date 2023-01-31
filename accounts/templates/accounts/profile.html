@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Pin Up Profile{% endblock %}
+
+{% block content %}
+<h1>Hey {{ user }}!</h1>
+<p><a href='{% url "accounts:update" %}'>edit this information</a> | <a href="{% url 'password_change' %}">change password</a></p>
+
+<p>email: {{ user.email }}</p>
+<p>default neighborhoods: {% for n in user.neighborhoods.all %}{{ n }}{% if forloop.counter != user.neighborhoods.count %}, {% endif %}{% endfor %}</p>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Delete {{ poster.get_poster_type_display }} "{{ object }}"{% endblock %}
+
+{% block content %}
+<a href="{% url 'calendar:index' %}">back to calendar</a>
+<h1>Delete poster "{{ object }}"?</h1>
+
+<p>Are you sure you want to delete the {{ poster.get_poster_type_display }} "{{ object }}"?</p>
+
+<form method="post">
+	{% csrf_token %}
+	{{ form }}
+	<input type="submit" value="Delete">
+</form>
+
+{% endblock %}

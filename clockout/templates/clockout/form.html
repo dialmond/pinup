@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Clock Out Form{% endblock %}
+
+{% block content %}
+<a href='{% url "clockout:index" %}'>back to clockout responses</a>
+<h1>New Clockout</h1>
+<form method="post">
+  {% csrf_token %}
+  <div class='form stacked'>
+  {{ form }}
+  </div>
+  <input type="submit" value="Submit">
+</form>
+
+<script>
+  var completed_el = document.getElementById("id_completed_route")
+  var need_someone_el = document.getElementById("id_need_someone")
+  completed_el.addEventListener("change", completedAutofill);
+  completedAutofill();
+
+  function completedAutofill() {
+    if (completed_el.value == "True")
+      need_someone_el.value = "False";
+  }
+</script>
+{% endblock %}

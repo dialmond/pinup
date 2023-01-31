@@ -1,0 +1,21 @@
+{{ errors }}
+{% if errors and not fields %}
+  {% for field in hidden_fields %}{{ field }}{% endfor %}
+{% endif %}
+{% for field, errors in fields %}
+  {{ errors }}
+    {% if field.label %}{{ field.label_tag }}{% endif %}
+    {% if field.name == "file" %}<div>{% endif %}
+    {{ field }}
+    {% if field.help_text %}
+      <br>
+      <span class="helptext">{{ field.help_text }}</span>
+    {% endif %}
+    {% if forloop.last %}
+      {% for field in hidden_fields %}{{ field }}{% endfor %}
+    {% endif %}
+    {% if field.name == file %}</div>{% endif %}
+{% endfor %}
+{% if not fields and not errors %}
+  {% for field in hidden_fields %}{{ field }}{% endfor %}
+{% endif %}

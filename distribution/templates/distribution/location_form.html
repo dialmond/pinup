@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}{% if location %}Update Location | {{ location }}{% else %}Create a Location{% endif %}{% endblock %}
+
+{% block content %}
+{% if location %}<a href="{% url 'distribution:location_detail' location.neighborhood.slug location.pk %}">back to {{ location }}</a>
+{% else %}
+	{% if neighborhood %}
+	<a href="{% url 'distribution:neighborhood_detail' neighborhood.slug %}">Back to {{ neighborhood }}</a>
+	{% else %}<a href="{% url 'distribution:neighborhood_index' %}">Back to neighborhoods</a>
+	{% endif %}
+{% endif %}
+<h1>{% if location %}Update Location | {{ location }}{% else %}Create a Location{% endif %}</h1>
+
+<h2>Location Map</h2>
+<div id='mapContainer'>
+  <p>Drag the marker to change the location's position on the map.</p>
+  <div id='map' style='margin-bottom:2em'>
+      Loading map...
+  </div>
+</div>
+<div>
+  <input type="button" onclick="getLocationButtonPress()" value="I am at this location">
+  <input id='clearBtn' type="button" onclick="clearLocation()" value="clear map position">
+  {% if object.lat and object.lon %}<input id='resetBtn' type="button" onclick="resetLocation()" value="reset map position" title='reset map position to original value'>{% endif %}
+</div>
+
+<h2>Location Info</h2>
+<form method="post">
+  {% csrf_token %}
+  <div class='form grid'>
+    {{ form }}
+    </div>
+  <b id='getLocationError' class='hidden'></b>
+  <input type="submit" value="Submit">
+</form>
+
+<script>
+	{% if neighborhood %}
+	//Neighborhood and areas dropdown stuff
+	//so we don't want to show *all* the areas under *all* the neighborhoods at once to the user
+	//we only show the areas under the currently selected neighborhood
+	//so we add an event listener to the neighborhood input, and run some function where
+	//we change the areas to be only the ones under that neighborhood (promise / json shit)
+	var neighborhood_el = document.getElementById('id_neighborhood');
+	var area_el = document.getElementById('id_area');
+	var current_area = area_el.value;
+	neighborhood_el.addEventListener("change", updateAreaChoices);
+
+	function updateAreaChoices(){
+		var neighborhood = neighborhood_el.value;
+		if(area_el.value != "")
+			current_area = area_el.value; //update the current area (what we *want* to select) if it's not emtpy
+		fetch('{% url "distribution:distribution_json" %}')
+   .then(response => {
+		 if (!response.ok) {
+			 throw new Error("HTTP error " + response.status);
+		 }
+		 return response.json();
+   })
+   .then(json => {
+		 this.data = json;
+     var areas = this.data[neighborhood]['areas']; //get the area json data
+		 updateAreaChoicesHelper(areas, current_area);
+   })
+   .catch(function () {
+		 this.dataError = true;
+   })
+	}
+	//runs when we get the area json data from the promise
+	function updateAreaChoicesHelper(areas, current_area){
+		while (area_el.options.length != 1) { //remove all options except first
+			area_el.remove(1);
+		}
+		for(const [key, value] of Object.entries(areas)){ //loop through our dictionary
+			area_el.add(new Option(value['name'], key, false, key == current_area)); //add options back
+			//^key == current_area: select option if it's the current area
+		}
+	}
+	updateAreaChoices(); //do it for the first time
+	{% endif %}
+</script>
+{% include 'distribution/location_map.html' %}
+
+{% endblock %}

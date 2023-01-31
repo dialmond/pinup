@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Distribution List | {{ location.neighborhood }} | {{ location }}{% endblock %}
+
+{% block content %}
+{% if location.neighborhood %}<a href="{% url 'distribution:neighborhood_detail' location.neighborhood.slug %}">back to {{ location.neighborhood }}</a>{% endif %}
+<h1>{{ location }}</h1>
+<p><a href='{% url 'distribution:location_update' location.neighborhood.slug location.pk %}'>edit</a> | <a href='{% url 'distribution:location_delete' location.neighborhood.slug location.pk %}'>delete</a></p>
+
+{% if location.lon and location.lat %}
+<div id='map'>
+    Loading map...
+</div>
+{% endif %}
+
+<div class='location'>
+<p><b>Posters:</b> {{ location.get_has_poster_spot_display }}</p>
+<p><b>Handbills:</b> {{ location.get_has_handbill_spot_display }}</p>
+{% if location.address %}<b>Address:</b><p>{{ location.address }}</p>{% endif %}
+{% if location.notes %}<b>Notes:</b><p class='pre'>{{ location.notes }}</p>{% endif %}
+{% if location.hours %}<b>Hours:</b><p>{{ location.hours }}</p>{% endif %}
+</div>
+
+{% include 'distribution/location_map.html' with object=location %}
+
+{% endblock %}

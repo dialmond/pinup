@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}version history: {{ page.title }}{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'wiki:detail' page.get_url  %}">back to page</a></p>
+<h1>version history: {{ page.title }}</h1>
+
+<details>
+	<summary>current | {{ page.created_by }}</summary>
+	<p class='pre'>{{ page.content }}</p>
+</details>
+
+{% if versions %}
+{% for version in versions %}
+<details class='version'>
+	<summary>{{ version.0.created_date }}| {{ version.0.created_by }}</summary>
+	<p class='pre'>{{ version.1 }}</p>
+
+  {% if user == page.created_by or page.protection == "NO" %}<a class='revertLink' href="#" onclick="revert('{% url "wiki:revert" page.get_url version.0.edit_number %}', {{ version.0.edit_number }})">revert to this version</a>{% endif %}
+</details>
+{% endfor %}
+{% else %}
+<p>there are no other versions of this page</p>
+{% endif %}
+
+<script>
+  function revert(redirect, edit_number){
+    if (confirm("Are you sure you wish to revert to version " + edit_number + "?\
+			\nThis cannot be undone.")){
+			window.location.href = redirect;
+		}
+	}
+</script>
+{% endblock %}

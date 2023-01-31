@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{% if create %}Create new page{% if page %} under {{ page.title }}{% endif %}{% else %}Update page {{ page.title }}{% endif %}{% endblock %}
+
+{% block content %}
+{% if page %}<a href="{% url 'wiki:detail' page.get_url %}">back to {{ page.title }}</a>{% endif %}
+<h1>{% if create %}Create new page{% if page %} under {{ page.title }}{% endif %}{% else %}Update page {{ page.title }}{% endif %}</h1>
+
+<form method="post" {% if form.file %}enctype="multipart/form-data"{% endif %}>
+  {% csrf_token %}
+  <div class='form grid'>
+  {{ form }}
+  </div>
+  <input type="submit" value="Submit">
+</form>
+
+{% endblock %}

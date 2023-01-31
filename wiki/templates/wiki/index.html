@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Pin Up Posters Courrier Collective Wiki{% endblock %}
+
+{% block content %}
+<h1>Pin Up Posters Courrier Collective Wiki</h1>
+<p>A place to create notes, upload files, and to generally store as a knowledge base for Pin Up.</p>
+<p><a href="{% url 'wiki:create' %}">create a page</a></p>
+<p><a href="{% url 'wiki:upload' %}">upload a file</a></p>
+<h2>All Wiki Pages (alphabetical order)</h2>
+<ul>
+  {{ pages|unordered_list }}
+</ul>
+{% endblock %}

@@ -1,0 +1,57 @@
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+
+<script>
+	/*var addressField = document.getElementById('id_address');
+	var addressWrapper = document.getElementById('addressWrapper');
+
+	function addressExists(){
+		if (addressField.value == "") {
+			document.getElementById('map').style.display = 'none';
+    		document.getElementById('coordinates').style.display = 'none';
+    		document.getElementById('id_lon').value = null; document.getElementById('id_lat').value = null;
+    		return false;
+		} else {
+			document.getElementById('map').style.display = 'inherit';
+    		document.getElementById('coordinates').style.display = 'inherit';
+    		return true;
+		}
+	}*/
+
+	mapboxgl.accessToken = 'pk.eyJ1IjoiY2RpYW1vbmQyNSIsImEiOiJjbDdkaHJqcnowNG1kM3dtZm9najd0Z3NsIn0.bywNebFGqlnBzNEjAI3ePg';
+
+	var map = new mapboxgl.Map({
+		container: 'map',
+		style: 'mapbox://styles/mapbox/streets-v11',
+		{% if object.lat and object.lon %}center: [{{ object.lon }}, {{ object.lat }}], zoom: 14
+		{% else %}center: [-79.9528409, 40.455588], zoom: 12
+		{% endif %}
+	});
+
+	var el;
+  var popup;
+  var marker;
+  {% for object in objects %}
+  el = document.createElement('div');
+	el.className = 'marker';
+
+  popup = new mapboxgl.Popup({ offset: 45, className: 'location' }).setHTML(
+    //"<p><a href='{% url 'distribution:location_detail' object.neighborhood.slug object.id %}' target='_blank'>{{ object|escapejs }}</a>"
+    `<p><a href='{% url 'distribution:location_detail' object.neighborhood.slug object.id %}' target='_blank'>{{ object|escapejs }}</a></p>
+<p><b>Posters:</b> {{ object.get_has_poster_spot_display }}</p>
+<p><b>Handbills:</b> {{ object.get_has_handbill_spot_display }}</p>
+{% if object.address %}<b>Address:</b><p>{{ object.address }}</p>{% endif %}
+{% if object.notes %}<b>Notes:</b><p class='pre'>{{ object.notes }}</p>{% endif %}
+{% if object.hours %}<b>Hours:</b><p>{{ object.hours }}</p>{% endif %}
+`
+  );
+
+	marker = new mapboxgl.Marker({
+		element: el,
+		anchor: 'bottom'
+	})
+	.setLngLat([{{ object.lon }}, {{ object.lat }}])
+  .setPopup(popup)
+	.addTo(map);
+  {% endfor %}
+	</script>

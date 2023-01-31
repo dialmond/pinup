@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Distribution List | {{ neighborhood }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'distribution:neighborhood_index' %}">back to neighborhoods</a>
+<h1>{{ neighborhood }}</h1>
+
+<div>
+  members assigned to this route: {% for u in neighborhood.users.all %}{{ u }}{% if forloop.counter != neighborhood.users.count %}, {% endif %}{% endfor %} |
+  {% if neighborhood.users.count != users.count %}
+  <form action="{% url 'distribution:update_assigned_members' neighborhood.slug %}" method="post" class="inline hidden" id='add_member_form' name='add_member_form'>
+    {% csrf_token %}
+    <select name="member" id="id_add_member" onblur="add_member()" onchange="document.forms['add_member_form'].submit()" required>
+      <option value="">---------</option>
+      {% for u in users %}
+      {% if u not in neighborhood.users.all %}<option value="{{ u.pk }}">{{ u }}</option>{% endif %}
+      {% endfor %}
+    </select>
+    <input type="hidden" value="add" name="action" id="id_action">|
+  </form>
+  <a href='#' onclick="add_member()">add member to this route</a> |
+  {% endif %}
+  {% if neighborhood.users.all %}
+  <form action="{% url 'distribution:update_assigned_members' neighborhood.slug %}" method="post" class="inline hidden" id='remove_member_form' name='remove_member_form'>
+    {% csrf_token %}
+    <select name="member" id="id_remove_member" onblur="remove_member()" onchange="document.forms['remove_member_form'].submit()" required>
+      <option value="">---------</option>
+      {% for u in neighborhood.users.all %}
+      <option value="{{ u.pk }}">{{ u }}</option>
+      {% endfor %}
+    </select>
+    <input type="hidden" value="remove" name="action" id="id_action">|
+  </form>
+  <a href='#' onclick="remove_member()">remove member from route</a>
+  {% endif %}
+</div>
+
+<h2>Locations</h2>
+{% if hasAddresses.count > 0 %}
+<div id='map'>
+    Loading map...
+</div>
+{% endif %}
+{% if neighborhood.location.count > 1 %}
+<button onclick="toggle_details(this)">expand all</button>
+{% endif %}
+{% if neighborhood.location.all or neighborhood.area.all %}
+{% for a in neighborhood.area.all %}
+<div class='area_container'>
+  <h3 id='area{{ forloop.counter0 }}'>{{ a }}</h3>
+  <form action="{% url 'distribution:area_update' a.pk %}" method="post" class="inline hidden" id='form{{ forloop.counter0 }}' name='area_update_{{ forloop.counter0 }}'>
+    {% csrf_token %}
+    <input type="text" name="new_name" id="new_name{{ forloop.counter0 }}" value="{{ a }}" onblur="rename_area({{ forloop.counter0 }})" onchange="document.forms['area_update_{{ forloop.counter0 }}'].submit()" required>
+  </form> |
+  <a href='#' onclick="rename_area({{ forloop.counter0 }})">rename</a> |
+  <a href='{% url 'distribution:area_delete' a.pk %}'>delete</a>
+</div>
+
+{% for l in a.location.all %}
+<details class='location'>
+  <summary>{{ l }} | <a href="{% url 'distribution:location_detail' neighborhood.slug l.id %}">detail page</a></summary>
+  <p>Posters: <span>{{ l.get_has_poster_spot_display }}</span></p>
+  <p>Handbills: <span>{{ l.get_has_handbill_spot_display }}</span></p>
+  {% if l.address %}<p>Address: <span>{{ l.address }}</span></p>{% endif %}
+  {% if l.notes %}<p>Notes: <span>{{ l.notes }}</span></p>{% endif %}
+  {% if l.hours %}<p>Hours: <span>{{ l.hours }}</span></p>{% endif %}
+</details>
+{% endfor %}
+<p><a href='{% url 'distribution:location_create' neighborhood.slug %}?area={{ a.id }}'>add a location under this area</a></p>
+{% endfor %}
+
+<h3>Misc. Locations</h3>
+{% for l in misc_locations %}
+<details class='location'>
+  <summary>{{ l }} | <a href="{% url 'distribution:location_detail' neighborhood.slug l.id %}">detail page</a></summary>
+  <p>Posters: <span>{{ l.get_has_poster_spot_display }}</span></p>
+  <p>Handbills: <span>{{ l.get_has_handbill_spot_display }}</span></p>
+  {% if l.address %}<p>Address: <span>{{ l.address }}</span></p>{% endif %}
+  {% if l.notes %}<p>Notes: <span class='pre'>{{ l.notes }}</span></p>{% endif %}
+  {% if l.hours %}<p>Hours: <span>{{ l.hours }}</span></p>{% endif %}
+</details>
+{% endfor %}
+
+<p><a href="{% url 'distribution:location_create' neighborhood.slug %}">add a location</a></p>
+{% else %}<p>There aren't any locations under this neighborhood. <a href="{% url 'distribution:location_create' neighborhood.slug %}">Add a location</a></p>
+{% endif %}
+
+<details>
+  <summary>add sub-area/street to this neighborhood</summary>
+  <form action="{% url 'distribution:area_create' neighborhood.slug %}" method="post" name="area_create">
+    {% csrf_token %}
+    <label for="name">area name:</label>
+    <input type="text" name="name" id="name" value="" required>
+    <input type="submit" value="Add area">
+  </form>
+</details>
+
+<script>
+  function rename_area(area_id){
+    if(0 < area_id < {{ neighborhood.area.count }}){
+      var text = document.getElementById('area' + area_id);
+      var form = document.getElementById('form' + area_id);
+      var input = document.getElementById('new_name' + area_id);
+      form.classList.toggle('hidden');
+      text.classList.toggle('hidden');
+      input.focus(); //focus input
+      input.selectionStart = input.selectionEnd = input.value.length; //move cursor to end
+    }
+  }
+
+  function add_member(){
+    var form = document.getElementById('add_member_form');
+    var input = document.getElementById('id_add_member');
+    form.classList.toggle('hidden');
+    input.focus();
+  }
+  function remove_member(){
+    var form = document.getElementById('remove_member_form');
+    var input = document.getElementById('id_remove_member');
+    form.classList.toggle('hidden');
+    input.focus();
+  }
+
+  var expand = true;
+  function toggle_details(button) {
+    var els = document.getElementsByTagName('details')
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].classList.contains('location')){ //target only location class details
+	els[i].open = expand;
+      }
+    }
+    if(expand)
+      button.innerText = 'collapse all';
+    else
+      button.innerText = 'expand all';
+    expand = !expand;
+  }
+</script>
+{% if hasAddresses.count > 0 %}
+{% include 'distribution/neighborhood_map.html' with objects=hasAddresses %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Clock Out Responses{% endblock %}
+
+{% block content %}
+<h1>Clock Out Responses</h1>
+<p><a href="{% url 'clockout:new' %}">submit new clock out</a></p>
+{% if responses %}
+{% for week, week_items in responses.items %}
+<!--<h2>Week {{ week }}</h2>
+<ul>
+  {% for response in week_items %}
+  <li>{{ response }}</li>
+  {% endfor %}
+</ul>-->
+<div class='calendar_entry'>
+  <h2>week {{ week }}</h2>
+  <div class='entry_container'>
+  {% for response in week_items %}
+  <div class='entry'>
+    {% if response.completed_route %}<div class='tag is-success'>completed</div>{% else %}<div class='tag is-error'>not completed</div>{% endif %}
+    {% if response.need_someone %}<div class='tag is-error'>needs help</div>{% endif %}
+    <h3>{{ response.user }}</h3>
+    <p class='info'>clocked out {{ response.submitted }}</p>
+    <p class='info'>neighborhoods: {% for n in response.neighborhoods.all %}{{ n }}{% if forloop.counter != response.neighborhoods.count %}, {% endif %}{% endfor %}</p>
+    {% if not response.completed_route or response.need_someone %}<p>{% if not response.completed_route %}Uncompleted{% endif %} route. {% if response.need_someone %}Needs someone to complete this route.{% endif %}</p>{% endif %}
+    <p>{% if response.notes %}{{ response.notes }}{% else %}No notes{% endif %}</p>
+  </div>
+  {% endfor %}
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<p>No responses found</p>
+{% endif %}
+{% endblock %}

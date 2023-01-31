@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Pin Up Posters Login{% endblock %}
+
+{% block content %}
+<h1 class='header'>Pin Up Posters Courier Collective</h1>
+<h1>Login</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="log in">
+</form>
+<h2>Password Requirements (in case you forgot):</h2>
+<ul>
+    <li>Your password can’t be too similar to your other personal information.</li>
+    <li>Your password must contain at least 8 characters.</li>
+    <li>Your password can’t be a commonly used password.</li>
+    <li>Your password can’t be entirely numeric.</li>
+</ul>
+<p><a href="{% url 'password_reset' %}">Reset forgotten password</a></p>
+{% endblock %}

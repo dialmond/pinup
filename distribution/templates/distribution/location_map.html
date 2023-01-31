@@ -1,0 +1,177 @@
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+
+<script>
+	/*var addressField = document.getElementById('id_address');
+	var addressWrapper = document.getElementById('addressWrapper');
+
+	function addressExists(){
+		if (addressField.value == "") {
+			document.getElementById('map').style.display = 'none';
+    		document.getElementById('coordinates').style.display = 'none';
+    		document.getElementById('id_lon').value = null; document.getElementById('id_lat').value = null;
+    		return false;
+		} else {
+			document.getElementById('map').style.display = 'inherit';
+    		document.getElementById('coordinates').style.display = 'inherit';
+    		return true;
+		}
+	}*/
+
+	mapboxgl.accessToken = 'pk.eyJ1IjoiY2RpYW1vbmQyNSIsImEiOiJjbDdkaHJqcnowNG1kM3dtZm9najd0Z3NsIn0.bywNebFGqlnBzNEjAI3ePg';
+	var lat_el = document.getElementById('id_lat');
+	var lon_el = document.getElementById('id_lon');
+
+	var map = new mapboxgl.Map({
+		container: 'map',
+		style: 'mapbox://styles/mapbox/streets-v11',
+		{% if object.lat and object.lon %}center: [{{ object.lon }}, {{ object.lat }}], zoom: 14
+		{% else %}center: [-79.98184, 40.44407], zoom: 2
+		{% endif %}
+	});
+
+	var el = document.createElement('div');
+	el.className = 'marker';
+
+	var marker = new mapboxgl.Marker({
+    {% if update %}draggable: true,{% endif %}
+		element: el,
+		anchor: 'bottom'
+	})
+	{% if object.lat and object.lon %}
+	.setLngLat([{{ object.lon }}, {{ object.lat }}])
+	.addTo(map);
+	{% endif %}
+	/*
+	var geocoder = new MapboxGeocoder({
+		accessToken: mapboxgl.accessToken,
+		marker: false,
+		{% if network %}bbox:[{{ network.lon }} - 1.5, {{ network.lat }} - 1.5, {{ network.lon }} + 1.5, {{ network.lat }} + 1.5],{% endif %}
+		flyTo: false,
+
+		mapboxgl: mapboxgl
+	});
+
+	addressWrapper.insertBefore(geocoder.onAdd(map), addressWrapper.firstChild);
+
+	geocoderField = document.getElementsByClassName('mapboxgl-ctrl-geocoder--input')[0];
+	geocoderField.addEventListener("keydown", geoToAddr); geocoderField.addEventListener("change", geoToAddr); geocoderField.addEventListener("keyup", geoToAddr);
+
+	{% if object.address %}geocoderField.value = "{{ object.address }}"; geocoder.query("{{ object.address }}");{% endif %}
+	addressExists(); //hide the map after it's been generated if there's no address
+
+	function geoToAddr(){
+		addressExists();
+		addressField.value = geocoderField.value;
+	}
+
+	var coordinatesWereCreated = false;
+	var initialCoords = [-1, -1];
+	geocoder.on('result', function(e) { //when the geocoder gets a result, move the marker to here
+		coordinatesWereCreated = true;
+		initialCoords = e.result.geometry.coordinates; //these last two lines help the user return back to these coordinates once they were created
+		map.flyTo({center: e.result.geometry.coordinates, zoom: 14, essential: true});
+		marker.setLngLat(e.result.geometry.coordinates);
+		marker.addTo(map);
+		onDragEnd();
+	});
+	geocoderField.addEventListener("click", function(){
+		this.select();
+		if(coordinatesWereCreated && geocoderField.value != ""){
+			marker.setLngLat(initialCoords);
+			onDragEnd();
+		}
+	});
+
+  */
+  {% if update or create %}
+  /*clearBtn:
+    * onclick: clears the id_lat and id_lon fields, hides mapContainer, hides clearBtn
+    * on start: hide if there's not a value in id_lat and id_lon - X
+
+    resetBtn:
+    * onclick: sets id_lat and id_lon to initial object values. moves map marker - X
+    * always: only render if there's an initial object lat/lon - X.
+      * hide if value in id_lat and id_lon empty OR != initial object values
+
+    map:
+    * on start / always: hide if there's not a value in id_lat and id_lon - X
+
+  */
+  {% if object.lat and object.lat %}var resetBtn = document.getElementById('resetBtn');{% endif %}
+  var clearBtn = document.getElementById('clearBtn');
+  var mapContainer = document.getElementById('mapContainer');
+	var error_el = document.getElementById('getLocationError');
+
+	function getLocationButtonPress(){ //gets triggered on our button push
+		navigator.geolocation.getCurrentPosition(getLocationSuccess);
+	}
+	function getLocationSuccess(position){ //success fn for above
+    show(mapContainer); //show map
+		lat_el.value = position.coords.latitude.toFixed(5); //only store 5 digits of decimal field
+		lon_el.value = position.coords.longitude.toFixed(5);
+    markerMove(lon_el.value, lat_el.value); //move marker to pos
+    {% if not object.lat and not object.lon %}
+    marker.addTo(map); // add marker to map (doesn't happen already if form doesn't have coordinates
+		map.flyTo({center: [marker.getLngLat().lng, marker.getLngLat().lat], zoom: 14, essential: true, speed: 1.5, maxDuration: 500}); //move map center to marker
+    show(clearBtn);
+    {% endif %}
+	}
+	function getLocationError(error){
+		console.log(error);
+		error_el.classList.remove('hidden');
+		if(error.code == 1)
+			error_el.innerText = "Please give permission to use location in order to get current position";
+		else if(error.code == 2)
+			error_el.innerText = "Your current position is unavailable.";
+		else
+			error_el.innerText = "Position timed out. Please try again.";
+	}
+  function markerMove(lon, lat) {
+    marker.setLngLat([lon, lat]) //move marker to pos
+		var lngLat = marker.getLngLat();
+    var z = map.getZoom() >= 14 ? 14 : map.getZoom();
+		map.flyTo({center: [lngLat.lng, lngLat.lat], zoom: z, essential: true, speed: 1.5, maxDuration: 500}); //move map center to marker
+  }
+
+	function onDragEnd() {
+		var lngLat = marker.getLngLat();
+		lat_el.value = Math.round( lngLat.lat * 100000 + Number.EPSILON ) / 100000; //round to 5 places
+		lon_el.value = Math.round( lngLat.lng * 100000 + Number.EPSILON ) / 100000; //round to 5 places
+    var z = map.getZoom() <= 14 ? 14 : map.getZoom();
+		map.flyTo({center: [lngLat.lng, lngLat.lat], zoom: z, essential: true});
+    {% if object.lat and object.lon %}show(resetBtn); //show the reset btn{% endif %}
+	}
+	marker.on('dragend', onDragEnd);
+
+  function show(el) {
+    if (el.classList.contains('hidden')) el.classList.remove('hidden');
+  }
+  function hide(el) {
+    if (!el.classList.contains('hidden')) el.classList.add('hidden');
+  }
+
+  function clearLocation() {
+    lat_el.value = ""; lon_el.value = ""; //clear the values for id_lat and id_lon
+    hide(mapContainer); //hide the map container
+    hide(clearBtn); //hide the clear btn
+    {% if object.lat and object.lon %}show(resetBtn); //show the reset button{% endif %}
+  }
+  {% if object.lat and object.lon %}
+  function resetLocation() {
+    lat_el.value = {{ object.lat }}; lon_el.value = {{ object.lon }}; //reset initial lat/lon values
+    show(mapContainer); //show map
+    markerMove({{ object.lon }}, {{ object.lat }}); //move marker to initial pos
+  }
+  {% endif %}
+
+  // initially:
+  if (lat_el.value == "" || lon_el.value == "") {
+    hide(mapContainer);
+    hide(clearBtn);
+  }
+  {% if object.lon and object.lat %}else hide(resetBtn);{% endif %}
+  {% endif %}
+
+	{% if update and object.lat and object.lon %}onDragEnd(){% endif %}
+</script>

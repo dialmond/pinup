@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Poster Calendar{% endblock %}
+
+{% block content %}
+<h1>Poster Calendar</h1>
+<p><a href='{% url "calendar:create" %}'>add a poster/handbill</a></p>
+<p>Posters organized by take down date.</p>
+{% for day, posters in days.items %}
+<div class='calendar_entry'>
+  <h2>{{ day }}</h2>
+  <div class='entry_container'>
+  {% for poster in posters %}
+  <div class='entry'>
+    <div class='tag is-{% if poster.poster_type %}info{% else %}warning{% endif %}'>{{ poster.get_poster_type_display }}</div>
+    {% if poster.is_past_takedown %}<div class='tag is-error'>take down</div>{% endif %}
+    <h3>{{ poster }}</h3>
+    | <a href='{% url "calendar:update" poster.pk %}'>edit</a> | <a href='{% url "calendar:delete" poster.pk %}'>delete</a>
+    <p class='info'>put up {{ poster.put_up_date }}</p>
+    <p class='info'>neighborhoods: {% for n in poster.neighborhoods.all %}{{ n }}{% if forloop.counter != poster.neighborhoods.count %}, {% endif %}{% endfor %}</p>
+    <p>{% if poster.notes %}{{ poster.notes }}{% else %}No notes{% endif %}</p>
+  </div>
+  {% endfor %}
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

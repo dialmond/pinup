@@ -1,0 +1,17 @@
+{% load pinup_filters %}
+<nav>
+  <label for="hamburger">&#9776;</label>
+  <input type="checkbox" id="hamburger"/>
+  <div class='navlinks'>
+    {% if request.user.is_authenticated %}
+    {% nav_link 'me' 'accounts:profile' request.path %}
+    {% nav_link 'clock out form' 'clockout:new' request.path %}
+    {% nav_link 'clock out responses' 'clockout:index' request.path %}
+    {% nav_link 'distribution list' 'distribution:neighborhood_index' request.path %}
+    {% nav_link 'poster calendar' 'calendar:index' request.path %}
+    {% nav_link 'wiki' 'wiki:index' request.path %}
+    {% nav_link 'log out' 'accounts:logout' request.path "float-right" %}
+    {% else %}{% nav_link 'log in' 'accounts:login' request.path "float-right" %}
+    {% endif %}
+  </div>
+</nav>

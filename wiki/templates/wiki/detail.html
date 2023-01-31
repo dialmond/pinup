@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load wiki_filters %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'wiki:index' %}">back to all pages</a></p>
+<p>
+  {% if page.parent %}parent: <a href="{% url 'wiki:detail' page.parent.get_url %}">{{ page.parent }}</a> |{% endif %}
+  {% if user == page.created_by or page.protection == "NO" %}<a href="{% url 'wiki:update' page.get_url %}">update page</a> |
+  <a href="{% url 'wiki:delete' page.get_url %}">delete page</a> |{% endif %}
+  <a href="{% url 'wiki:history' page.get_url %}">version history</a>
+</p>
+<p>Protection: {{ page.get_protection_display }}</p>
+<h1>{{ page.title }}</h1>
+
+{% if page.content %}<p class='pre'>{{ page.content }}</p>{% endif %}
+{{ page.file|preview }}
+
+<p><a href="{% url 'wiki:create' page.get_url %}">Create child page here</a></p>
+<p><a href="{% url 'wiki:upload' page.get_url %}">Upload a file here</a></p>
+
+{% if page.child.all %}
+<hr>
+<h1>Children</h1>
+<ul>
+{% for child in page.child.all %}
+<li><a href="{% url 'wiki:detail' child.get_url %}">{{ child }}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

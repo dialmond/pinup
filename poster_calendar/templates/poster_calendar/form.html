@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{% if poster %}Update {{ poster.get_poster_type_display }} | {{ poster }}{% else %}Add a Poster/Handbill{% endif %}{% endblock %}
+
+{% block content %}
+<a href="{% url 'calendar:index' %}">back to calendar</a>
+<h1>{% if poster %}update {{ poster.get_poster_type_display }} | {{ poster }}{% else %}add a poster/handbill{% endif %}</h1>
+
+<form method="post">
+	{% csrf_token %}
+  <div class='form grid'>
+	{{ form }}
+  </div>
+	<input type="button" value="Set take down date to 3 months after put up date" onclick="change_take_down_date()">
+	<input type="submit" value="Submit">
+</form>
+
+<script>
+	var takedown_el = document.getElementById("id_take_down_date");
+	var putup_el = document.getElementById("id_put_up_date");
+	function change_take_down_date(){
+		var my_date = putup_el.valueAsDate;
+		my_date.setMonth(my_date.getMonth() + 3);
+		takedown_el.value = my_date.toISOString().split('T')[0];
+	}
+</script>
+
+{% endblock %}

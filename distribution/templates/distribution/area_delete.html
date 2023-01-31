@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Delete area "{{ object }}"{% endblock %}
+
+{% block content %}
+<a href="{% url 'distribution:neighborhood_detail' object.neighborhood.slug %}">back to {{ object.neighborhood  }}</a>
+<h1>delete area "{{ object }}"?</h1>
+
+<p>Are you sure you want to delete this area?</p>
+{% if object.child.all %}
+<p><b>Doing so will remove this area (not change the neighborhood though) from all these locations:</b></p>
+<ul>
+	{% for child in page.child.all %}
+	<li>{{ child }}</li>
+	{% endfor %}
+</ul>
+{% endif %}
+
+<form method="post">
+	{% csrf_token %}
+	{{ form }}
+	<input type="submit" value="Delete">
+</form>
+
+{% endblock %}

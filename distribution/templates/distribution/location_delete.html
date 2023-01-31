@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Delete location "{{ object }}"{% endblock %}
+
+{% block content %}
+<a href="{% url 'distribution:location_detail' object.neighborhood.slug object.pk %}">back to {{ object  }}</a>
+<h1>delete location "{{ object }}"?</h1>
+
+<p>Are you sure you want to delete the location "{{ object }}"?</p>
+
+<form method="post">
+	{% csrf_token %}
+	{{ form }}
+	<input type="submit" value="Delete">
+</form>
+
+{% endblock %}
