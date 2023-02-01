@@ -170,12 +170,23 @@ form p input, form p select, form p textarea {
   font-size: 1rem;
 }
 
-details {
+details:not(li details) {
   background-color: var(--gray);
   padding: 0.75em 0.5em;
 }
-details[open=""] summary {
+details[open=""]:not(li details) summary {
   margin-bottom:1em;
+}
+li details {margin-bottom: 0.5rem; padding-bottom: 0.5rem;}
+li details summary{
+  border: 2px solid var(--info);
+  padding: 0.5rem;
+}
+li details[open=""] summary{border: none;}
+li details[open=""] {border: 2px solid var(--info);}
+li details summary:before{
+  content: '📁'; /*folder emoji */
+  margin-right: 4px;
 }
 
 /* Neighborhood Index Page */

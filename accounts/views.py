@@ -10,9 +10,12 @@ from django.contrib.auth import logout
 
 from .models import User
 from .forms import *
+from .affirmations import *
+
+import random
 
 def profile(request):
-    context = {'user': request.user}
+    context = {'user': request.user, 'affirmation': random.choice(affirmations)}
     return render(request, 'accounts/profile.html', context)
 
 def user_update(request):

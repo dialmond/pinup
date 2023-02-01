@@ -11,6 +11,14 @@ class Neighborhood(models.Model):
     created_date = models.DateTimeField(default=timezone.now)
     users = models.ManyToManyField(User, related_name="neighborhoods", blank=True)
 
+    @property
+    def handbillspots(self):
+        return len([i for i in self.location.all() if i.has_handbill_spot])
+    @property
+    def posterspots(self):
+        return len([i for i in self.location.all() if i.has_poster_spot])
+
+
     def __str__(self):
         return self.name
     class Meta:

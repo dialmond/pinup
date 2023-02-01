@@ -6,7 +6,7 @@
 <h1>Neighborhoods</h1>
 <ul class='neighborhoods'>
 	{% for neighborhood in neighborhoods %}
-	<li><a href="{% url 'distribution:neighborhood_detail' neighborhood.slug %}">{{ neighborhood }}</a>: {{ neighborhood.location.count }} location{{ neighborhood.location.count|pluralize }}</li>
+	<li><a href="{% url 'distribution:neighborhood_detail' neighborhood.slug %}">{{ neighborhood }}</a>: {{ neighborhood.location.count }} location{{ neighborhood.location.count|pluralize }}, {{ neighborhood.posterspots }} poster spot{{ neighborhood.posterspots|pluralize }}, {{ neighborhood.handbillspots }} handbill spot{{ neighborhood.handbillspots|pluralize }}</li>
 	{% endfor %}
 </ul>
 {% endblock %}

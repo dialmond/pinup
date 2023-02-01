@@ -8,4 +8,6 @@
 
 <p>email: {{ user.email }}</p>
 <p>default neighborhoods: {% for n in user.neighborhoods.all %}{{ n }}{% if forloop.counter != user.neighborhoods.count %}, {% endif %}{% endfor %}</p>
+<br>
+<p>AI generated affirmation: {{ affirmation }}</p>
 {% endblock %}

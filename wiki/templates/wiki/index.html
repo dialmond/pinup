@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load wiki_filters %}
 
 {% block title %}Pin Up Posters Courrier Collective Wiki{% endblock %}
 
@@ -9,6 +10,6 @@
 <p><a href="{% url 'wiki:upload' %}">upload a file</a></p>
 <h2>All Wiki Pages (alphabetical order)</h2>
 <ul>
-  {{ pages|unordered_list }}
+  {{ pages|my_unordered_list }}
 </ul>
 {% endblock %}
